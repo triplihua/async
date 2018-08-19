@@ -19,8 +19,7 @@ async def get_html(session, url):
     try:
         # 6.31415926535 66.30009722709656秒  ----左边是时间没有控制好的错误例子，好像重复执行了500多次
         async with session.get(url=url, timeout=10.31415926535) as resp:
-            # 这个timeout非常重要，笔趣阁的服务器是有点渣，他既不拒绝你又不答应你，时间自己好好考虑
-            # 我这里采用的是回调，可以说，如果不懂异常处理和回调，你不要看了
+            # 这个timeout非常重要，笔趣阁的服务器是有点渣，他既不拒绝你又不答应你，时间自己好好考虑，尽可能的少重复请求
             if not resp.status // 100 == 2:
                 print(resp.status)
                 print("爬取", url, "出现错误")
@@ -73,15 +72,14 @@ async def get_content(session, chapter_url):
 
 
 async def run(url):
+         
     async with aiohttp.ClientSession() as session:
         session.headers = HEADERS
         html = await get_html(session, url)
         url_list = parse_url(html)
         tasks = []
         for each in url_list:
-
             tasks.append(asyncio.ensure_future(get_content(session, each)))
-
         await asyncio.gather(*tasks)
 
 
@@ -95,4 +93,4 @@ if __name__ == '__main__':
     LOOP.run_until_complete(run(url))
     print(func() - start)
 
-# 我qq在上面，有不懂可以问我，但是图方便可以直接到下面提问，但是我不一定能回答出来'''
+
